@@ -59,6 +59,40 @@ string FindGold()
    return "";
 }
 
+string TfJson(string sym, int tf, string name)
+{
+   int dg = (int)MarketInfo(sym, MODE_DIGITS);
+   double close = iClose(sym, tf, 0);
+   double up = iBands(sym, tf, 20, 2, 0, PRICE_CLOSE, MODE_UPPER, 0);
+   double lo = iBands(sym, tf, 20, 2, 0, PRICE_CLOSE, MODE_LOWER, 0);
+   double bbPos = (up - lo) > 0 ? (close - lo) / (up - lo) : 0.5;   // 0=下軌 1=上軌
+   double buyVol = 0, sellVol = 0, sumVol = 0;
+   int n = MathMin(20, iBars(sym, tf) - 1);
+   for(int i = 1; i <= n; i++)
+   {
+      double v = (double)iVolume(sym, tf, i);
+      sumVol += v;
+      if(iClose(sym, tf, i) > iOpen(sym, tf, i)) buyVol += v;
+      else if(iClose(sym, tf, i) < iOpen(sym, tf, i)) sellVol += v;
+   }
+   string j = "\"" + name + "\":{";
+   j += "\"close\":" + D(close, dg);
+   j += ",\"rsi\":" + D(iRSI(sym, tf, 14, PRICE_CLOSE, 0));
+   j += ",\"macd\":" + D(iMACD(sym, tf, 12, 26, 9, PRICE_CLOSE, MODE_MAIN, 0), dg + 1);
+   j += ",\"macdSignal\":" + D(iMACD(sym, tf, 12, 26, 9, PRICE_CLOSE, MODE_SIGNAL, 0), dg + 1);
+   j += ",\"ema20\":" + D(iMA(sym, tf, 20, 0, MODE_EMA, PRICE_CLOSE, 0), dg);
+   j += ",\"ema50\":" + D(iMA(sym, tf, 50, 0, MODE_EMA, PRICE_CLOSE, 0), dg);
+   j += ",\"ema200\":" + D(iMA(sym, tf, 200, 0, MODE_EMA, PRICE_CLOSE, 0), dg);
+   j += ",\"atr\":" + D(iATR(sym, tf, 14, 0), dg);
+   j += ",\"bbPos\":" + D(bbPos, 3);
+   j += ",\"lastVol\":" + D((double)iVolume(sym, tf, 1), 0);
+   j += ",\"avgVol\":" + D(n > 0 ? sumVol / n : 0, 1);
+   j += ",\"buyVol\":" + D(buyVol, 0);
+   j += ",\"sellVol\":" + D(sellVol, 0);
+   j += "}";
+   return j;
+}
+
 int OnInit()
 {
    g_gold = FindGold();
@@ -150,6 +184,8 @@ void WriteJson()
       gd = (int)MarketInfo(g_gold, MODE_DIGITS);
    }
    j += "\"gold\":{\"symbol\":" + Q(g_gold) + ",\"bid\":" + D(gb, gd) + ",\"ask\":" + D(ga, gd) + "},";
+   if(g_gold != "")
+      j += "\"tech\":{" + TfJson(g_gold, PERIOD_M15, "M15") + "," + TfJson(g_gold, PERIOD_H1, "H1") + "," + TfJson(g_gold, PERIOD_H4, "H4") + "},";
    j += "\"serverTime\":" + T(now) + ",";
    j += "\"localTime\":" + T(TimeLocal()) + ",";
    j += "\"unix\":" + IntegerToString((long)TimeGMT());
