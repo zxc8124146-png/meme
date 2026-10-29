@@ -93,6 +93,87 @@ string TfJson(string sym, int tf, string name)
    return j;
 }
 
+string BarsJson(string sym, int tf, string name, int count)
+{
+   int dg = (int)MarketInfo(sym, MODE_DIGITS);
+   int n = MathMin(count, iBars(sym, tf));
+   string j = "\"" + name + "\":[";
+   for(int i = n - 1; i >= 0; i--)
+   {
+      j += "[" + IntegerToString((long)iTime(sym, tf, i)) + "," + D(iOpen(sym, tf, i), dg) + "," + D(iHigh(sym, tf, i), dg) + ","
+         + D(iLow(sym, tf, i), dg) + "," + D(iClose(sym, tf, i), dg) + ","
+         + D(iMA(sym, tf, 20, 0, MODE_EMA, PRICE_CLOSE, i), dg) + "," + D(iMA(sym, tf, 50, 0, MODE_EMA, PRICE_CLOSE, i), dg) + "]";
+      if(i > 0) j += ",";
+   }
+   return j + "]";
+}
+
+string g_suffix = "";
+string FindSym(string base)
+{
+   string c[4];
+   c[0] = base + g_suffix; c[1] = base; c[2] = base + "m"; c[3] = base + ".";
+   for(int i = 0; i < 4; i++)
+      if(StringLen(c[i]) > 0 && SymbolSelect(c[i], true) && MarketInfo(c[i], MODE_BID) > 0) return c[i];
+   return "";
+}
+
+string MarketsJson()
+{
+   string groups[32] = {
+      "USDX", "DXY", "DX", "USDIDX",  "US500", "SPX500", "SP500", "US500Cash",  "USOIL", "WTI", "XTIUSD", "CL",
+      "EURUSD", "", "", "",  "XAGUSD", "SILVER", "", "",  "BTCUSD", "BTCUSDT", "", "",  "USDJPY", "", "", "",  "US30", "DJ30", "WS30", "" };
+   string j = "\"markets\":[";
+   int cnt = 0;
+   for(int g = 0; g < 8; g++)
+   {
+      string sym = "";
+      for(int k = 0; k < 4 && sym == ""; k++) if(groups[g * 4 + k] != "") sym = FindSym(groups[g * 4 + k]);
+      if(sym == "") continue;
+      int dg = (int)MarketInfo(sym, MODE_DIGITS);
+      double bid = MarketInfo(sym, MODE_BID);
+      double prev = iClose(sym, PERIOD_D1, 1);
+      double chg = prev > 0 ? (bid - prev) / prev * 100.0 : 0;
+      if(cnt > 0) j += ",";
+      j += "{\"name\":" + Q(groups[g * 4]) + ",\"symbol\":" + Q(sym) + ",\"bid\":" + D(bid, dg) + ",\"chg\":" + D(chg, 2) + "}";
+      cnt++;
+   }
+   return j + "]";
+}
+
+string DailyJson(string sym)
+{
+   int dg = (int)MarketInfo(sym, MODE_DIGITS);
+   double ph = iHigh(sym, PERIOD_D1, 1), pl = iLow(sym, PERIOD_D1, 1), pc = iClose(sym, PERIOD_D1, 1);
+   double pp = (ph + pl + pc) / 3.0;
+   string j = "\"daily\":{";
+   j += "\"open\":" + D(iOpen(sym, PERIOD_D1, 0), dg) + ",\"high\":" + D(iHigh(sym, PERIOD_D1, 0), dg) + ",\"low\":" + D(iLow(sym, PERIOD_D1, 0), dg);
+   j += ",\"prevHigh\":" + D(ph, dg) + ",\"prevLow\":" + D(pl, dg) + ",\"prevClose\":" + D(pc, dg);
+   j += ",\"atrD1\":" + D(iATR(sym, PERIOD_D1, 14, 1), dg);
+   j += ",\"pp\":" + D(pp, dg);
+   j += ",\"r1\":" + D(2 * pp - pl, dg) + ",\"s1\":" + D(2 * pp - ph, dg);
+   j += ",\"r2\":" + D(pp + (ph - pl), dg) + ",\"s2\":" + D(pp - (ph - pl), dg);
+   j += ",\"r3\":" + D(ph + 2 * (pp - pl), dg) + ",\"s3\":" + D(pl - 2 * (ph - pp), dg);
+   return j + "}";
+}
+
+string ClosedWeekJson(datetime now)
+{
+   datetime from = now - 7 * 86400;
+   string j = "\"closedWeek\":[";
+   int cnt = 0;
+   for(int k = OrdersHistoryTotal() - 1; k >= 0 && cnt < 500; k--)
+   {
+      if(!OrderSelect(k, SELECT_BY_POS, MODE_HISTORY)) continue;
+      if(OrderType() > OP_SELL) continue;
+      if(OrderCloseTime() < from) continue;
+      if(cnt > 0) j += ",";
+      j += "[" + IntegerToString((long)OrderCloseTime()) + "," + D(OrderProfit() + OrderSwap() + OrderCommission()) + "," + Q(OrderSymbol()) + "," + Q(TypeName(OrderType())) + "," + D(OrderLots()) + "]";
+      cnt++;
+   }
+   return j + "]";
+}
+
 int OnInit()
 {
    g_gold = FindGold();
@@ -186,6 +267,15 @@ void WriteJson()
    j += "\"gold\":{\"symbol\":" + Q(g_gold) + ",\"bid\":" + D(gb, gd) + ",\"ask\":" + D(ga, gd) + "},";
    if(g_gold != "")
       j += "\"tech\":{" + TfJson(g_gold, PERIOD_M15, "M15") + "," + TfJson(g_gold, PERIOD_H1, "H1") + "," + TfJson(g_gold, PERIOD_H4, "H4") + "},";
+   if(g_gold != "")
+   {
+      int gp = StringFind(g_gold, "XAUUSD");
+      g_suffix = gp >= 0 ? StringSubstr(g_gold, gp + 6) : "";
+      j += "\"bars\":{" + BarsJson(g_gold, PERIOD_M15, "M15", 120) + "," + BarsJson(g_gold, PERIOD_H1, "H1", 120) + "," + BarsJson(g_gold, PERIOD_H4, "H4", 120) + "},";
+      j += DailyJson(g_gold) + ",";
+   }
+   j += MarketsJson() + ",";
+   j += ClosedWeekJson(now) + ",";
    j += "\"serverTime\":" + T(now) + ",";
    j += "\"localTime\":" + T(TimeLocal()) + ",";
    j += "\"unix\":" + IntegerToString((long)TimeGMT());
