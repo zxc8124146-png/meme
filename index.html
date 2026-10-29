@@ -68,6 +68,8 @@ tr:hover td{background:rgba(255,204,51,.04)}.tag{padding:2px 8px;border-radius:6
 const $=id=>document.getElementById(id),PROV="https://mt-provisioning-api-v1.agiliumtrade.agiliumtrade.ai/users/current/accounts";
 const fmt=(n,d=2)=>n==null||isNaN(n)?"—":Number(n).toLocaleString("en-US",{minimumFractionDigits:d,maximumFractionDigits:d});
 const sg=n=>(n>=0?"+":"")+fmt(n),cls=n=>n>=0?"pos":"neg",tw=t=>new Date(t).toLocaleString("zh-TW",{timeZone:"Asia/Taipei",hour12:false});
+(function(){const m=location.hash.match(/^#setup=(.+)$/);if(!m)return;history.replaceState(null,"",location.pathname+location.search);
+ try{const o=JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(m[1])))));if(o.token&&o.accountId)localStorage.setItem("mt4dash",JSON.stringify({token:o.token,accountId:o.accountId,region:o.region||"new-york"}))}catch(e){console.warn("setup link invalid")}})();
 let S=JSON.parse(localStorage.getItem("mt4dash")||sessionStorage.getItem("mt4dash")||"null"),gold=null,hist=[],timer;
 // ---- 黃金價格 ----
 async function goldTick(){try{const r=await fetch("https://api.gold-api.com/price/XAU",{cache:"no-store"});const j=await r.json();const p=j.price;
