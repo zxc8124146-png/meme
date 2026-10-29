@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><title>Grok Bot · 合約比拼裁判板</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+:root{--bg:#07090a;--panel:#0d1112;--line:#1b2326;--txt:#d7e0dc;--dim:#7b8a85;--acc:#39ff6a;--up:#2ee66b;--dn:#ff5468;--yel:#e8c547;--blue:#5b9fff;--pur:#c084fc}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font:13px/1.5 -apple-system,"Segoe UI","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif}
+.num,td,th,.v{font-family:"JetBrains Mono","SF Mono",Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+.wrap{max-width:1100px;margin:0 auto;padding:20px}
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:16px}
+.brand{font:600 17px "JetBrains Mono",Menlo,monospace;letter-spacing:1px;color:var(--acc)}.brand span{color:var(--dim)}
+.meta{color:var(--dim);font-size:12px}
+.live{display:inline-flex;align-items:center;gap:6px;font:600 11px "JetBrains Mono",monospace;color:var(--acc);border:1px solid #1f4a2c;border-radius:3px;padding:2px 8px;margin-right:8px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--acc);animation:b 2s infinite}@keyframes b{50%{opacity:.3}}
+.rules{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:12px 14px;margin-bottom:16px;color:var(--dim);font-size:12.5px}
+.rules b{color:var(--txt)}.rules .t{color:var(--yel);font-weight:600;margin-right:6px}
+.race{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+@media(max-width:720px){.race{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden;position:relative}
+.card.lead{border-color:#2a5a38;box-shadow:0 0 0 1px #1f4a2c inset}
+.card .hd{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.card .name{font:600 15px inherit;color:#fff}
+.card .badge{font:600 10px "JetBrains Mono",monospace;padding:2px 7px;border-radius:3px;border:1px solid var(--line);color:var(--dim)}
+.card .badge.lead{color:var(--acc);border-color:#1f4a2c;background:#0f2e1a}
+.card .badge.win{color:var(--yel);border-color:#4a4220;background:#2a2410}
+.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line)}
+.kpi{background:var(--panel);padding:12px 14px}
+.kpi .k{color:var(--dim);font-size:11px}.kpi .v{font-size:22px;font-weight:600;margin-top:2px}.kpi .n{color:var(--dim);font-size:11px;margin-top:2px}
+.bar{height:6px;background:#11181a;margin:0 14px 12px;border-radius:3px;overflow:hidden}
+.bar>i{display:block;height:100%;background:linear-gradient(90deg,#1f4a2c,var(--acc));border-radius:3px;transition:width .4s}
+.up{color:var(--up)!important}.dn{color:var(--dn)!important}
+.sec{background:var(--panel);border:1px solid var(--line);border-radius:6px;margin-bottom:14px}
+.sec>h2{margin:0;padding:10px 14px;border-bottom:1px solid var(--line);font-size:13px;font-weight:600;display:flex;justify-content:space-between}
+.sec>h2 small{color:var(--dim);font-weight:normal}
+.sec .body{padding:8px 14px 12px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{color:var(--dim);font-weight:normal;font-size:11.5px;text-align:right;padding:7px 8px;border-bottom:1px solid var(--line)}
+td{text-align:right;padding:7px 8px;border-bottom:1px solid #141b1d;white-space:nowrap}
+th:first-child,td:first-child,.l{text-align:left}
+.tag{font-size:11px;padding:1px 6px;border-radius:3px;font-weight:600}
+.LONG{background:#0f2e1a;color:var(--up)}.SHORT{background:#36121a;color:var(--dn)}
+.tk{font-weight:600;color:#fff}
+.empty{color:var(--dim);padding:16px 4px;text-align:center}
+.foot{color:#55625e;font-size:11px;margin-top:10px}
+.vs{text-align:center;color:var(--dim);font:600 12px "JetBrains Mono",monospace;margin:-6px 0 10px}
+</style></head><body><div class="wrap">
+<header>
+ <div>
+  <div class="brand">Grok Bot <span>·</span> 合約比拼裁判板</div>
+  <div class="meta">OKX 小幣合約 · $50 → $200 · 裁判只記分，不替任何人下單</div>
+ </div>
+ <div class="meta" style="text-align:right"><span class="live"><span class="dot"></span>BOARD</span><span id="upd">載入中…</span></div>
+</header>
+
+<div class="rules" id="rules">—</div>
+<div class="vs">誰先把權益打到 $200 誰贏</div>
+<div class="race" id="race"></div>
+
+<div class="sec"><h2>目前持倉 Open <small id="posc"></small></h2><div class="body" id="pos"></div></div>
+<div class="sec"><h2>成交紀錄 Trades <small id="trc"></small></h2><div class="body" id="trades"></div></div>
+<div class="foot">時間 Asia/Taipei (UTC+8)。勝率 = 已平倉獲利筆數 ÷ 已平倉筆數。非投資建議。資料由 Grok Bot 裁判更新。</div>
+</div>
+<script>
+const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const D='—';
+const usd=v=>v==null?D:'$'+Number(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const susd=v=>v==null?D:(v>=0?'+':'-')+'$'+Math.abs(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const pct=v=>v==null?D:(v>=0?'+':'')+Number(v).toFixed(1)+'%';
+const ud=v=>v==null||v===0?'':v>0?'up':'dn';
+const ft=v=>{if(!v)return D;const d=new Date(v);return isNaN(d)?esc(v):d.toLocaleString('zh-TW',{timeZone:'Asia/Taipei',hour12:false,month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})};
+
+async function load(){
+  const r=await fetch('api/duel.json?t='+Date.now(),{cache:'no-store'});
+  if(!r.ok)throw new Error('duel '+r.status);
+  return r.json();
+}
+
+function render(S){
+  const R=S.rules||{}, T=S.traders||[];
+  $('#upd').textContent='更新 '+(S.updated_at_tw||D)+' (UTC+8)';
+  const st=S.status==='waiting_deposit'?'等待入金':S.status==='live'?'對戰中':S.status==='finished'?'已結束':(S.status||D);
+  $('#rules').innerHTML=`<span class="t">規則</span><b>起手</b> ${usd(R.start_usd)} · <b>目標</b> ${usd(R.target_usd)} · <b>交易所</b> ${esc(R.venue||'OKX')} · <b>標的</b> ${esc(R.universe||'小幣')} · <b>裁判</b> ${esc(R.referee||'Grok Bot')} · <b>狀態</b> ${esc(st)}`;
+
+  const target=R.target_usd||200, start=R.start_usd||50;
+  const leadEq=Math.max(...T.map(t=>t.equity_usd||0),0);
+  const finished=T.find(t=>(t.equity_usd||0)>=target);
+
+  $('#race').innerHTML=T.map(t=>{
+    const eq=t.equity_usd??start;
+    const prog=Math.max(0,Math.min(100,((eq-start)/(target-start))*100));
+    const isLead=!finished&&eq===leadEq&&eq>start;
+    const isWin=finished&&t.id===finished.id;
+    const wr=t.closed?(t.win_rate_pct!=null?t.win_rate_pct.toFixed(0)+'%':((t.wins||0)/t.closed*100).toFixed(0)+'%'):D;
+    const badge=isWin?'<span class="badge win">勝</span>':(isLead?'<span class="badge lead">領先</span>':'<span class="badge">參賽</span>');
+    return `<div class="card${isLead||isWin?' lead':''}">
+      <div class="hd"><div class="name">${esc(t.name)}</div>${badge}</div>
+      <div class="kpis">
+        <div class="kpi"><div class="k">目前權益</div><div class="v">${usd(eq)}</div><div class="n">目標 ${usd(target)}</div></div>
+        <div class="kpi"><div class="k">損益 PnL</div><div class="v ${ud(t.pnl_usd)}">${susd(t.pnl_usd)}</div><div class="n">${pct(t.return_pct)}</div></div>
+        <div class="kpi"><div class="k">勝率</div><div class="v">${esc(wr)}</div><div class="n">勝 ${t.wins||0} / 平倉 ${t.closed||0}</div></div>
+        <div class="kpi"><div class="k">持倉中</div><div class="v">${(t.open||[]).length}</div><div class="n">成交 ${(t.trades||[]).length} 筆</div></div>
+      </div>
+      <div class="bar"><i style="width:${prog.toFixed(1)}%"></i></div>
+    </div>`;
+  }).join('');
+
+  const opens=T.flatMap(t=>(t.open||[]).map(o=>({...o,trader:t.name})));
+  $('#posc').textContent=opens.length?opens.length+' 筆':'';
+  $('#pos').innerHTML=opens.length?'<table><tr><th>交易員</th><th class="l">方向</th><th class="l">標的</th><th>槓桿</th><th>進場</th><th>現價</th><th>未實現</th><th>停損</th></tr>'+
+    opens.map(o=>`<tr><td class="l">${esc(o.trader)}</td><td class="l"><span class="tag ${esc((o.side||'').toUpperCase())}">${esc((o.side||D).toUpperCase())}</span></td><td class="l"><span class="tk">${esc(o.symbol||D)}</span></td><td>${o.leverage!=null?o.leverage+'x':D}</td><td>${o.entry!=null?'$'+Number(o.entry):D}</td><td>${o.mark!=null?'$'+Number(o.mark):D}</td><td class="${ud(o.upnl_usd)}">${susd(o.upnl_usd)}</td><td>${o.sl!=null?'$'+Number(o.sl):D}</td></tr>`).join('')+'</table>':'<div class="empty">目前無持倉 · 入金並開第一單後會顯示在這裡</div>';
+
+  const trades=T.flatMap(t=>(t.trades||[]).map(x=>({...x,trader:t.name}))).sort((a,b)=>String(b.time||'').localeCompare(String(a.time||'')));
+  $('#trc').textContent=trades.length?trades.length+' 筆':'';
+  $('#trades').innerHTML=trades.length?'<table><tr><th>時間</th><th>交易員</th><th class="l">方向</th><th class="l">標的</th><th>槓桿</th><th>名義</th><th>實現損益</th><th>結果</th></tr>'+
+    trades.map(x=>{const res=x.result||(x.pnl_usd>0?'WIN':x.pnl_usd<0?'LOSS':'');return `<tr><td>${ft(x.time)}</td><td class="l">${esc(x.trader)}</td><td class="l"><span class="tag ${esc((x.side||'').toUpperCase())}">${esc((x.side||D).toUpperCase())}</span></td><td class="l"><span class="tk">${esc(x.symbol||D)}</span></td><td>${x.leverage!=null?x.leverage+'x':D}</td><td>${usd(x.notional_usd)}</td><td class="${ud(x.pnl_usd)}">${susd(x.pnl_usd)}</td><td class="${res==='WIN'?'up':res==='LOSS'?'dn':''}">${esc(res||D)}</td></tr>`;}).join('')+'</table>':'<div class="empty">尚無成交 · 兩位開單後裁判會記到這裡並算勝率</div>';
+}
+
+load().then(render).catch(e=>{$('#upd').textContent='載入失敗';$('#rules').textContent=String(e)});
+setInterval(()=>load().then(render).catch(()=>{}),60000);
+</script></body></html>

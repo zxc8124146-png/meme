@@ -1,120 +1,130 @@
 <!DOCTYPE html>
-<html lang="zh-Hant"><head><meta charset="utf-8"><title>Grok Bot · 合約比拼裁判板</title>
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>老闆的 MT4 黃金戰情室</title>
+<meta name="robots" content="noindex">
 <style>
-:root{--bg:#07090a;--panel:#0d1112;--line:#1b2326;--txt:#d7e0dc;--dim:#7b8a85;--acc:#39ff6a;--up:#2ee66b;--dn:#ff5468;--yel:#e8c547;--blue:#5b9fff;--pur:#c084fc}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--txt);font:13px/1.5 -apple-system,"Segoe UI","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif}
-.num,td,th,.v{font-family:"JetBrains Mono","SF Mono",Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
-.wrap{max-width:1100px;margin:0 auto;padding:20px}
-header{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:16px}
-.brand{font:600 17px "JetBrains Mono",Menlo,monospace;letter-spacing:1px;color:var(--acc)}.brand span{color:var(--dim)}
-.meta{color:var(--dim);font-size:12px}
-.live{display:inline-flex;align-items:center;gap:6px;font:600 11px "JetBrains Mono",monospace;color:var(--acc);border:1px solid #1f4a2c;border-radius:3px;padding:2px 8px;margin-right:8px}
-.dot{width:7px;height:7px;border-radius:50%;background:var(--acc);animation:b 2s infinite}@keyframes b{50%{opacity:.3}}
-.rules{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:12px 14px;margin-bottom:16px;color:var(--dim);font-size:12.5px}
-.rules b{color:var(--txt)}.rules .t{color:var(--yel);font-weight:600;margin-right:6px}
-.race{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
-@media(max-width:720px){.race{grid-template-columns:1fr}}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden;position:relative}
-.card.lead{border-color:#2a5a38;box-shadow:0 0 0 1px #1f4a2c inset}
-.card .hd{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
-.card .name{font:600 15px inherit;color:#fff}
-.card .badge{font:600 10px "JetBrains Mono",monospace;padding:2px 7px;border-radius:3px;border:1px solid var(--line);color:var(--dim)}
-.card .badge.lead{color:var(--acc);border-color:#1f4a2c;background:#0f2e1a}
-.card .badge.win{color:var(--yel);border-color:#4a4220;background:#2a2410}
-.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line)}
-.kpi{background:var(--panel);padding:12px 14px}
-.kpi .k{color:var(--dim);font-size:11px}.kpi .v{font-size:22px;font-weight:600;margin-top:2px}.kpi .n{color:var(--dim);font-size:11px;margin-top:2px}
-.bar{height:6px;background:#11181a;margin:0 14px 12px;border-radius:3px;overflow:hidden}
-.bar>i{display:block;height:100%;background:linear-gradient(90deg,#1f4a2c,var(--acc));border-radius:3px;transition:width .4s}
-.up{color:var(--up)!important}.dn{color:var(--dn)!important}
-.sec{background:var(--panel);border:1px solid var(--line);border-radius:6px;margin-bottom:14px}
-.sec>h2{margin:0;padding:10px 14px;border-bottom:1px solid var(--line);font-size:13px;font-weight:600;display:flex;justify-content:space-between}
-.sec>h2 small{color:var(--dim);font-weight:normal}
-.sec .body{padding:8px 14px 12px;overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:12.5px}
-th{color:var(--dim);font-weight:normal;font-size:11.5px;text-align:right;padding:7px 8px;border-bottom:1px solid var(--line)}
-td{text-align:right;padding:7px 8px;border-bottom:1px solid #141b1d;white-space:nowrap}
-th:first-child,td:first-child,.l{text-align:left}
-.tag{font-size:11px;padding:1px 6px;border-radius:3px;font-weight:600}
-.LONG{background:#0f2e1a;color:var(--up)}.SHORT{background:#36121a;color:var(--dn)}
-.tk{font-weight:600;color:#fff}
-.empty{color:var(--dim);padding:16px 4px;text-align:center}
-.foot{color:#55625e;font-size:11px;margin-top:10px}
-.vs{text-align:center;color:var(--dim);font:600 12px "JetBrains Mono",monospace;margin:-6px 0 10px}
-</style></head><body><div class="wrap">
-<header>
- <div>
-  <div class="brand">Grok Bot <span>·</span> 合約比拼裁判板</div>
-  <div class="meta">OKX 小幣合約 · $50 → $200 · 裁判只記分，不替任何人下單</div>
+:root{--bg:#050505;--card:#0d0d0f;--line:#1f1f24;--gold:#ffcc33;--gold2:#ff9f1a;--up:#19e68c;--dn:#ff3b5c;--txt:#e8e8ea;--mut:#7b7b85}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(1200px 600px at 70% -10%,#2a1d00 0,transparent 60%),var(--bg);color:var(--txt);font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;min-height:100vh}
+body:before{content:"";position:fixed;inset:0;background:linear-gradient(transparent 97%,rgba(255,204,51,.05) 97%) 0 0/100% 32px,linear-gradient(90deg,transparent 97%,rgba(255,204,51,.04) 97%) 0 0/32px 100%;pointer-events:none}
+.mono{font-family:"JetBrains Mono",Consolas,monospace}
+header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--line);position:relative;z-index:1}
+.logo{font-weight:900;font-size:20px;letter-spacing:2px}.logo b{color:var(--gold);text-shadow:0 0 12px var(--gold)}
+.badge{padding:4px 10px;border-radius:99px;font-size:12px;border:1px solid}.demo{color:var(--gold2);border-color:var(--gold2);animation:blink 2s infinite}.live{color:var(--up);border-color:var(--up)}
+@keyframes blink{50%{opacity:.4}}
+.ticker{overflow:hidden;border-bottom:1px solid var(--line);background:#000;white-space:nowrap}.ticker div{display:inline-block;padding:8px 0;animation:scroll 30s linear infinite;color:var(--gold)}
+@keyframes scroll{from{transform:translateX(100vw)}to{transform:translateX(-100%)}}
+main{max-width:1200px;margin:auto;padding:24px;position:relative;z-index:1}
+.hero{display:grid;grid-template-columns:1.3fr 1fr;gap:20px}@media(max-width:800px){.hero{grid-template-columns:1fr}}
+.card{background:linear-gradient(160deg,#111114,#08080a);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:0 0 0 1px rgba(255,204,51,.03),0 10px 40px rgba(0,0,0,.6)}
+.gold{border-color:rgba(255,204,51,.35);box-shadow:0 0 30px rgba(255,170,0,.12)}
+.lbl{color:var(--mut);font-size:13px;letter-spacing:1px}
+.price{font-size:56px;font-weight:800;color:var(--gold);text-shadow:0 0 18px rgba(255,204,51,.6);transition:color .3s}
+.price.up{color:var(--up);text-shadow:0 0 18px var(--up)}.price.dn{color:var(--dn);text-shadow:0 0 18px var(--dn)}
+canvas{width:100%;height:90px}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.stat .v{font-size:26px;font-weight:800;margin-top:6px}
+.pos{color:var(--up)}.neg{color:var(--dn)}
+h2{font-size:16px;color:var(--gold);letter-spacing:2px;margin:28px 0 12px}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:10px 8px;text-align:right;border-bottom:1px solid var(--line)}th:first-child,td:first-child{text-align:left}th{color:var(--mut);font-weight:500}
+tr:hover td{background:rgba(255,204,51,.04)}.tag{padding:2px 8px;border-radius:6px;font-size:12px;font-weight:700}.buy{background:rgba(25,230,140,.15);color:var(--up)}.sell{background:rgba(255,59,92,.15);color:var(--dn)}
+.btn{background:linear-gradient(90deg,var(--gold),var(--gold2));color:#000;font-weight:800;border:0;border-radius:10px;padding:10px 18px;cursor:pointer}.btn.ghost{background:none;color:var(--gold);border:1px solid var(--gold)}
+#login{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:9}
+#login .card{width:min(460px,92vw)}input,select{width:100%;background:#000;border:1px solid #2a2a30;color:var(--txt);border-radius:8px;padding:10px;margin:6px 0 12px;font-size:15px}input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 10px rgba(255,204,51,.3)}
+.small{font-size:12px;color:var(--mut);line-height:1.6}.small a{color:var(--gold)}#msg{color:var(--gold2);min-height:20px;font-size:13px}
+.tabs{display:flex;gap:8px;margin-bottom:12px}.tabs button{flex:1}.foot{color:var(--mut);font-size:12px;text-align:center;padding:30px}
+</style></head><body>
+<header><div class="logo">⚜ <b>GOLD</b> 戰情室 <span class="mono" style="font-size:12px;color:var(--mut)">MT4 唯讀</span></div>
+<div><span id="mode" class="badge demo">示範資料</span> <button class="btn ghost" id="authBtn">登入 MT4</button></div></header>
+<div class="ticker"><div id="tick" class="mono">XAUUSD 載入中…</div></div>
+<main>
+<div class="hero">
+ <div class="card gold"><div class="lbl">黃金現價 XAUUSD（每 5 秒更新）</div><div id="gp" class="price mono">----.--</div>
+  <div class="mono small" id="gchg">—</div><canvas id="spark" width="600" height="90"></canvas></div>
+ <div class="stats">
+  <div class="card stat"><div class="lbl">總金額（淨值 Equity）</div><div class="v mono" id="eq">—</div></div>
+  <div class="card stat"><div class="lbl">帳戶餘額 Balance</div><div class="v mono" id="bal">—</div></div>
+  <div class="card stat"><div class="lbl">當日營利（已平倉+浮動）</div><div class="v mono" id="today">—</div></div>
+  <div class="card stat"><div class="lbl">持倉總口數</div><div class="v mono" id="lots">—</div></div>
  </div>
- <div class="meta" style="text-align:right"><span class="live"><span class="dot"></span>BOARD</span><span id="upd">載入中…</span></div>
-</header>
-
-<div class="rules" id="rules">—</div>
-<div class="vs">誰先把權益打到 $200 誰贏</div>
-<div class="race" id="race"></div>
-
-<div class="sec"><h2>目前持倉 Open <small id="posc"></small></h2><div class="body" id="pos"></div></div>
-<div class="sec"><h2>成交紀錄 Trades <small id="trc"></small></h2><div class="body" id="trades"></div></div>
-<div class="foot">時間 Asia/Taipei (UTC+8)。勝率 = 已平倉獲利筆數 ÷ 已平倉筆數。非投資建議。資料由 Grok Bot 裁判更新。</div>
 </div>
+<div class="small mono" id="acct" style="margin-top:12px"></div>
+<h2>▍持倉中訂單</h2><div class="card" style="overflow:auto"><table><thead><tr><th>品種</th><th>方向</th><th>口數</th><th>開倉價</th><th>現價</th><th>停損/停利</th><th>浮動盈虧</th><th>開倉時間</th></tr></thead><tbody id="open"></tbody></table></div>
+<h2>▍今日成交紀錄</h2><div class="card" style="overflow:auto"><table><thead><tr><th>品種</th><th>方向</th><th>口數</th><th>價格</th><th>盈虧</th><th>時間</th></tr></thead><tbody id="hist"></tbody></table></div>
+<div class="foot">本站為<b>唯讀</b>看盤面板，不會下單、改單或平倉。登入資料只存在你的瀏覽器，直接連線 MetaApi，不經過任何其他伺服器。</div>
+</main>
+<div id="login"><div class="card gold">
+ <div class="logo" style="margin-bottom:10px">登入 <b>MT4</b></div>
+ <div class="tabs"><button class="btn" id="tNew">新增 MT4 帳號</button><button class="btn ghost" id="tOld">已有 MetaApi 帳號 ID</button></div>
+ <label class="lbl">MetaApi Token</label><input id="tok" type="password" placeholder="到 app.metaapi.cloud/token 複製">
+ <div id="fNew"><label class="lbl">MT4 帳號</label><input id="login_no" inputmode="numeric" placeholder="例如 12345678">
+  <label class="lbl">投資人密碼（唯讀密碼）</label><input id="pw" type="password" placeholder="請用 Investor Password，勿用交易密碼">
+  <label class="lbl">伺服器名稱</label><input id="srv" placeholder="例如 ICMarketsSC-Live07（MT4 登入畫面上的名稱）"></div>
+ <div id="fOld" style="display:none"><label class="lbl">MetaApi 帳號 ID</label><input id="aid" placeholder="xxxxxxxx-xxxx-..."></div>
+ <label class="small"><input type="checkbox" id="remember" checked style="width:auto"> 在這台裝置記住 Token 與帳號 ID（密碼永不儲存）</label>
+ <div id="msg"></div>
+ <div style="display:flex;gap:8px"><button class="btn" id="go" style="flex:1">連線</button><button class="btn ghost" id="cancel">取消</button></div>
+ <p class="small">密碼只會直接傳給 MetaApi 用來連線你的 MT4，本站不會儲存或轉送。<br>沒有 Token？到 <a href="https://app.metaapi.cloud/sign-up" target="_blank">metaapi.cloud</a> 免費註冊 → API access token。</p>
+</div></div>
 <script>
-const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const D='—';
-const usd=v=>v==null?D:'$'+Number(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
-const susd=v=>v==null?D:(v>=0?'+':'-')+'$'+Math.abs(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
-const pct=v=>v==null?D:(v>=0?'+':'')+Number(v).toFixed(1)+'%';
-const ud=v=>v==null||v===0?'':v>0?'up':'dn';
-const ft=v=>{if(!v)return D;const d=new Date(v);return isNaN(d)?esc(v):d.toLocaleString('zh-TW',{timeZone:'Asia/Taipei',hour12:false,month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})};
-
-async function load(){
-  const r=await fetch('api/duel.json?t='+Date.now(),{cache:'no-store'});
-  if(!r.ok)throw new Error('duel '+r.status);
-  return r.json();
-}
-
-function render(S){
-  const R=S.rules||{}, T=S.traders||[];
-  $('#upd').textContent='更新 '+(S.updated_at_tw||D)+' (UTC+8)';
-  const st=S.status==='waiting_deposit'?'等待入金':S.status==='live'?'對戰中':S.status==='finished'?'已結束':(S.status||D);
-  $('#rules').innerHTML=`<span class="t">規則</span><b>起手</b> ${usd(R.start_usd)} · <b>目標</b> ${usd(R.target_usd)} · <b>交易所</b> ${esc(R.venue||'OKX')} · <b>標的</b> ${esc(R.universe||'小幣')} · <b>裁判</b> ${esc(R.referee||'Grok Bot')} · <b>狀態</b> ${esc(st)}`;
-
-  const target=R.target_usd||200, start=R.start_usd||50;
-  const leadEq=Math.max(...T.map(t=>t.equity_usd||0),0);
-  const finished=T.find(t=>(t.equity_usd||0)>=target);
-
-  $('#race').innerHTML=T.map(t=>{
-    const eq=t.equity_usd??start;
-    const prog=Math.max(0,Math.min(100,((eq-start)/(target-start))*100));
-    const isLead=!finished&&eq===leadEq&&eq>start;
-    const isWin=finished&&t.id===finished.id;
-    const wr=t.closed?(t.win_rate_pct!=null?t.win_rate_pct.toFixed(0)+'%':((t.wins||0)/t.closed*100).toFixed(0)+'%'):D;
-    const badge=isWin?'<span class="badge win">勝</span>':(isLead?'<span class="badge lead">領先</span>':'<span class="badge">參賽</span>');
-    return `<div class="card${isLead||isWin?' lead':''}">
-      <div class="hd"><div class="name">${esc(t.name)}</div>${badge}</div>
-      <div class="kpis">
-        <div class="kpi"><div class="k">目前權益</div><div class="v">${usd(eq)}</div><div class="n">目標 ${usd(target)}</div></div>
-        <div class="kpi"><div class="k">損益 PnL</div><div class="v ${ud(t.pnl_usd)}">${susd(t.pnl_usd)}</div><div class="n">${pct(t.return_pct)}</div></div>
-        <div class="kpi"><div class="k">勝率</div><div class="v">${esc(wr)}</div><div class="n">勝 ${t.wins||0} / 平倉 ${t.closed||0}</div></div>
-        <div class="kpi"><div class="k">持倉中</div><div class="v">${(t.open||[]).length}</div><div class="n">成交 ${(t.trades||[]).length} 筆</div></div>
-      </div>
-      <div class="bar"><i style="width:${prog.toFixed(1)}%"></i></div>
-    </div>`;
-  }).join('');
-
-  const opens=T.flatMap(t=>(t.open||[]).map(o=>({...o,trader:t.name})));
-  $('#posc').textContent=opens.length?opens.length+' 筆':'';
-  $('#pos').innerHTML=opens.length?'<table><tr><th>交易員</th><th class="l">方向</th><th class="l">標的</th><th>槓桿</th><th>進場</th><th>現價</th><th>未實現</th><th>停損</th></tr>'+
-    opens.map(o=>`<tr><td class="l">${esc(o.trader)}</td><td class="l"><span class="tag ${esc((o.side||'').toUpperCase())}">${esc((o.side||D).toUpperCase())}</span></td><td class="l"><span class="tk">${esc(o.symbol||D)}</span></td><td>${o.leverage!=null?o.leverage+'x':D}</td><td>${o.entry!=null?'$'+Number(o.entry):D}</td><td>${o.mark!=null?'$'+Number(o.mark):D}</td><td class="${ud(o.upnl_usd)}">${susd(o.upnl_usd)}</td><td>${o.sl!=null?'$'+Number(o.sl):D}</td></tr>`).join('')+'</table>':'<div class="empty">目前無持倉 · 入金並開第一單後會顯示在這裡</div>';
-
-  const trades=T.flatMap(t=>(t.trades||[]).map(x=>({...x,trader:t.name}))).sort((a,b)=>String(b.time||'').localeCompare(String(a.time||'')));
-  $('#trc').textContent=trades.length?trades.length+' 筆':'';
-  $('#trades').innerHTML=trades.length?'<table><tr><th>時間</th><th>交易員</th><th class="l">方向</th><th class="l">標的</th><th>槓桿</th><th>名義</th><th>實現損益</th><th>結果</th></tr>'+
-    trades.map(x=>{const res=x.result||(x.pnl_usd>0?'WIN':x.pnl_usd<0?'LOSS':'');return `<tr><td>${ft(x.time)}</td><td class="l">${esc(x.trader)}</td><td class="l"><span class="tag ${esc((x.side||'').toUpperCase())}">${esc((x.side||D).toUpperCase())}</span></td><td class="l"><span class="tk">${esc(x.symbol||D)}</span></td><td>${x.leverage!=null?x.leverage+'x':D}</td><td>${usd(x.notional_usd)}</td><td class="${ud(x.pnl_usd)}">${susd(x.pnl_usd)}</td><td class="${res==='WIN'?'up':res==='LOSS'?'dn':''}">${esc(res||D)}</td></tr>`;}).join('')+'</table>':'<div class="empty">尚無成交 · 兩位開單後裁判會記到這裡並算勝率</div>';
-}
-
-load().then(render).catch(e=>{$('#upd').textContent='載入失敗';$('#rules').textContent=String(e)});
-setInterval(()=>load().then(render).catch(()=>{}),60000);
+const $=id=>document.getElementById(id),PROV="https://mt-provisioning-api-v1.agiliumtrade.agiliumtrade.ai/users/current/accounts";
+const fmt=(n,d=2)=>n==null||isNaN(n)?"—":Number(n).toLocaleString("en-US",{minimumFractionDigits:d,maximumFractionDigits:d});
+const sg=n=>(n>=0?"+":"")+fmt(n),cls=n=>n>=0?"pos":"neg",tw=t=>new Date(t).toLocaleString("zh-TW",{timeZone:"Asia/Taipei",hour12:false});
+let S=JSON.parse(localStorage.getItem("mt4dash")||sessionStorage.getItem("mt4dash")||"null"),gold=null,hist=[],timer;
+// ---- 黃金價格 ----
+async function goldTick(){try{const r=await fetch("https://api.gold-api.com/price/XAU",{cache:"no-store"});const j=await r.json();const p=j.price;
+ const el=$("gp");if(gold!=null&&p!==gold){el.className="price mono "+(p>gold?"up":"dn");setTimeout(()=>el.className="price mono",800)}
+ el.textContent=fmt(p);hist.push(p);if(hist.length>120)hist.shift();const d=p-hist[0];
+ $("gchg").innerHTML=`<span class="${cls(d)}">${sg(d)} (${(d/hist[0]*100).toFixed(3)}%)</span> 本頁開啟以來 · 更新 ${tw(j.updatedAt)} · 來源 gold-api.com`;
+ $("tick").textContent=`XAUUSD ${fmt(p)}  ▲▼  ${sg(d)}  ◆  ${new Date().toLocaleTimeString("zh-TW",{hour12:false})}  ◆  老闆，今天也要賺 ◆  唯讀模式 · 不會下單`.repeat(3);
+ gold=p;spark();if(!S)demo()}catch(e){$("gchg").textContent="金價暫時無法取得，重試中…"}}
+function spark(){const c=$("spark"),x=c.getContext("2d");x.clearRect(0,0,600,90);if(hist.length<2)return;const mn=Math.min(...hist),mx=Math.max(...hist),r=mx-mn||1;
+ const g=x.createLinearGradient(0,0,0,90);g.addColorStop(0,"rgba(255,204,51,.35)");g.addColorStop(1,"rgba(255,204,51,0)");x.beginPath();
+ hist.forEach((v,i)=>{const X=i/(hist.length-1)*600,Y=85-(v-mn)/r*80;i?x.lineTo(X,Y):x.moveTo(X,Y)});x.strokeStyle="#ffcc33";x.lineWidth=2;x.shadowColor="#ffcc33";x.shadowBlur=10;x.stroke();
+ x.lineTo(600,90);x.lineTo(0,90);x.fillStyle=g;x.shadowBlur=0;x.fill()}
+// ---- 顯示 ----
+function render(info,pos,deals,isDemo){const cur=info.currency||"USD";
+ const fl=pos.reduce((a,p)=>a+(p.profit||0)+(p.swap||0)+(p.commission||0),0);
+ const td=deals.filter(d=>/DEAL_TYPE_(BUY|SELL)/.test(d.type)).reduce((a,d)=>a+(d.profit||0)+(d.swap||0)+(d.commission||0),0);
+ $("eq").textContent=fmt(info.equity)+" "+cur;$("bal").textContent=fmt(info.balance)+" "+cur;
+ $("today").innerHTML=`<span class="${cls(td+fl)}">${sg(td+fl)}</span><div class="small">已平倉 ${sg(td)} · 浮動 ${sg(fl)}</div>`;
+ $("lots").textContent=fmt(pos.reduce((a,p)=>a+p.volume,0))+" 口";
+ $("acct").textContent=isDemo?"⚠ 示範資料：目前未登入，以下數字皆為範例，非你的真實帳戶。":`帳號 ${info.login||""} · ${info.name||""} · ${info.server||""} · 槓桿 1:${info.leverage||"-"} · 可用保證金 ${fmt(info.freeMargin)} · 更新 ${tw(Date.now())}`;
+ const side=t=>/BUY/.test(t)?'<span class="tag buy">買 BUY</span>':'<span class="tag sell">賣 SELL</span>';
+ $("open").innerHTML=pos.length?pos.map(p=>`<tr><td>${p.symbol}</td><td>${side(p.type)}</td><td class="mono">${fmt(p.volume)}</td><td class="mono">${fmt(p.openPrice)}</td><td class="mono">${fmt(p.currentPrice)}</td><td class="mono small">${p.stopLoss?fmt(p.stopLoss):"-"} / ${p.takeProfit?fmt(p.takeProfit):"-"}</td><td class="mono ${cls(p.profit)}">${sg(p.profit)}</td><td class="small">${tw(p.time)}</td></tr>`).join(""):'<tr><td colspan="8" class="small">目前沒有持倉</td></tr>';
+ const dl=deals.filter(d=>/DEAL_TYPE_(BUY|SELL)/.test(d.type)).reverse();
+ $("hist").innerHTML=dl.length?dl.map(d=>`<tr><td>${d.symbol}</td><td>${side(d.type)} <span class="small">${/OUT/.test(d.entryType)?"平倉":"開倉"}</span></td><td class="mono">${fmt(d.volume)}</td><td class="mono">${fmt(d.price)}</td><td class="mono ${cls(d.profit)}">${sg(d.profit)}</td><td class="small">${tw(d.time)}</td></tr>`).join(""):'<tr><td colspan="6" class="small">今日尚無成交</td></tr>'}
+function demo(){const g=gold||4000,now=Date.now();
+ const pos=[{symbol:"XAUUSD",type:"POSITION_TYPE_BUY",volume:1.0,openPrice:g-6.4,currentPrice:g,stopLoss:g-20,takeProfit:g+25,time:now-3.6e6},
+  {symbol:"XAUUSD",type:"POSITION_TYPE_SELL",volume:0.5,openPrice:g+3.1,currentPrice:g,time:now-9e5}];
+ pos.forEach(p=>p.profit=(/BUY/.test(p.type)?p.currentPrice-p.openPrice:p.openPrice-p.currentPrice)*100*p.volume);
+ const deals=[{symbol:"XAUUSD",type:"DEAL_TYPE_BUY",entryType:"DEAL_ENTRY_IN",volume:0.3,price:g-12,profit:0,time:now-7.2e6},{symbol:"XAUUSD",type:"DEAL_TYPE_SELL",entryType:"DEAL_ENTRY_OUT",volume:0.3,price:g-2,profit:300,time:now-5.4e6}];
+ const bal=10000;render({balance:bal,equity:bal+pos.reduce((a,p)=>a+p.profit,0),currency:"USD"},pos,deals,true)}
+// ---- MetaApi（只用 GET 讀取，不下單）----
+async function api(url,opt={}){const r=await fetch(url,{...opt,headers:{"auth-token":S?.token||$("tok").value.trim(),"Content-Type":"application/json",...(opt.headers||{})}});
+ const t=await r.text();let j;try{j=JSON.parse(t)}catch{j=t}if(!r.ok&&r.status!==202)throw new Error((j&&j.message)||("HTTP "+r.status));return{status:r.status,j,h:r.headers}}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function load(){try{const base=`https://mt-client-api-v1.${S.region||"new-york"}.agiliumtrade.ai/users/current/accounts/${S.accountId}`;
+ const st=new Date();st.setHours(0,0,0,0);
+ const [i,p,d]=await Promise.all([api(base+"/account-information"),api(base+"/positions"),api(`${base}/history-deals/time/${st.toISOString()}/${new Date(Date.now()+6e4).toISOString()}`)]);
+ render(i.j,p.j||[],(d.j&&d.j.deals)||d.j||[],false);$("mode").className="badge live";$("mode").textContent="● 即時連線"}
+ catch(e){$("mode").className="badge demo";$("mode").textContent="連線中斷："+e.message}}
+async function connect(){const tok=$("tok").value.trim(),msg=t=>$("msg").textContent=t;if(!tok)return msg("請輸入 MetaApi Token");
+ S={token:tok};try{let id;
+  if($("fOld").style.display!=="none"){id=$("aid").value.trim();if(!id)return msg("請輸入帳號 ID")}
+  else{const body={name:"MT4-"+$("login_no").value.trim(),type:"cloud-g2",login:$("login_no").value.trim(),password:$("pw").value,server:$("srv").value.trim(),platform:"mt4",magic:0};
+   if(!body.login||!body.password||!body.server)return msg("請填完帳號、投資人密碼、伺服器");
+   const tx=crypto.randomUUID().replace(/-/g,"");msg("正在向 MetaApi 建立連線…");
+   for(let k=0;k<30;k++){const r=await api(PROV,{method:"POST",body:JSON.stringify(body),headers:{"transaction-id":tx}});
+    if(r.status===202){msg("MetaApi 正在偵測券商伺服器設定…");await sleep((+r.h.get("retry-after")||5)*1000);continue}id=r.j.id;break}
+   $("pw").value="";if(!id)throw new Error("建立逾時，請稍後再試")}
+  for(let k=0;k<60;k++){const a=(await api(`${PROV}/${id}`)).j;S.region=a.region||"new-york";
+   if(a.state==="UNDEPLOYED"){await api(`${PROV}/${id}/deploy`,{method:"POST"})}
+   if(a.connectionStatus==="CONNECTED")break;msg(`部署中… (${a.state} / ${a.connectionStatus})，首次約需 1–2 分鐘`);await sleep(5000)}
+  S.accountId=id;(($("remember").checked)?localStorage:sessionStorage).setItem("mt4dash",JSON.stringify(S));
+  msg("");$("login").style.display="none";start()}catch(e){S=null;msg("失敗："+e.message)}}
+function start(){clearInterval(timer);$("authBtn").textContent=S?"登出":"登入 MT4";if(S){load();timer=setInterval(load,10000)}else{$("mode").className="badge demo";$("mode").textContent="示範資料";demo()}}
+$("authBtn").onclick=()=>{if(S){localStorage.removeItem("mt4dash");sessionStorage.removeItem("mt4dash");S=null;start()}else $("login").style.display="flex"};
+$("cancel").onclick=()=>$("login").style.display="none";$("go").onclick=connect;
+$("tNew").onclick=()=>{$("fNew").style.display="";$("fOld").style.display="none";$("tNew").className="btn";$("tOld").className="btn ghost"};
+$("tOld").onclick=()=>{$("fNew").style.display="none";$("fOld").style.display="";$("tOld").className="btn";$("tNew").className="btn ghost"};
+goldTick();setInterval(goldTick,5000);start();
 </script></body></html>
