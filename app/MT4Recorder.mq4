@@ -3,8 +3,19 @@
 //| 每 2 秒輸出 JSON 到 Common\Files\mt4dash.json                    |
 //+------------------------------------------------------------------+
 #property copyright "kin"
-#property version   "1.00"
+#property version   "1.11"
 #property strict
+
+// Read-only. This EA never places, modifies, or deletes orders.
+// Daily realized backfill is an export of already-loaded Account History:
+// closed buy/sell net = profit + swap + commission, every symbol (same scope
+// as todayRealized). Balance, credit, and pending orders are exported only as
+// range anchors and are not earnings. The covered span is the earliest loaded
+// history record through the current broker day. Days before that span are
+// omitted on purpose: MT4 only returns the history range loaded in the
+// terminal, and a missing day outside that range is not a zero-earnings day.
+// In the terminal: Account History -> right click -> All History (全部歷史),
+// then wait for the download before expecting older days to appear.
 
 input int    IntervalSec = 2;
 input string OutFile     = "mt4dash.json";
@@ -174,6 +185,144 @@ string ClosedWeekJson(datetime now)
    return j + "]";
 }
 
+datetime g_histScan = 0;
+int      g_histTotal = -1;
+string   g_histFrom = "";
+string   g_histTo = "";
+int      g_histLoaded = 0;
+bool     g_histCovered = false;
+string   g_histStamp = "0";
+
+string DealKind(int t)
+{
+   if(t == OP_BUY) return "B";
+   if(t == OP_SELL) return "S";
+   // Deposit/withdrawal is history type 6 and credit is 7. Those names are
+   // not in the documented order-type enum and are undeclared on some
+   // MetaEditor builds, so the numeric codes are used directly.
+   // Market orders stay 0 and 1; anything above OP_SELL is still not earnings.
+   if(t == 6) return "D";
+   if(t == 7) return "C";
+   if(t == OP_BUYLIMIT || t == OP_SELLLIMIT || t == OP_BUYSTOP || t == OP_SELLSTOP) return "P";
+   return "O";
+}
+
+datetime HistStamp()
+{
+   datetime t = OrderCloseTime();
+   if(t <= 0) t = OrderOpenTime();
+   return t;
+}
+
+datetime DayStart(datetime t)
+{
+   return t - (t % 86400);
+}
+
+string CleanSym(string s)
+{
+   StringReplace(s, ",", " ");
+   StringReplace(s, "\"", "");
+   StringReplace(s, "\r", " ");
+   StringReplace(s, "\n", " ");
+   return s;
+}
+
+void UpdateRealizedExport()
+{
+   int total = OrdersHistoryTotal();
+   datetime now = TimeCurrent();
+   if(g_histScan > 0 && (now - g_histScan) < 5) return;
+   if(g_histScan > 0 && total == g_histTotal && (now - g_histScan) < 60) return;
+   g_histScan = now;
+   g_histTotal = total;
+
+   datetime earliest = 0;
+   int seen = 0;
+   for(int i = 0; i < total; i++)
+   {
+      if(!OrderSelect(i, SELECT_BY_POS, MODE_HISTORY)) continue;
+      seen++;
+      datetime ts = HistStamp();
+      if(ts <= 0) continue;
+      if(earliest == 0 || ts < earliest) earliest = ts;
+   }
+
+   string from = "";
+   string to = "";
+   bool covered = false;
+   if(seen > 0 && earliest > 0)
+   {
+      datetime start = DayStart(earliest);
+      datetime end = DayStart(now);
+      int span = (int)((end - start) / 86400);
+      if(span >= 0 && span <= 20000)
+      {
+         covered = true;
+         from = TimeToString(start, TIME_DATE);
+         to = TimeToString(end, TIME_DATE);
+      }
+   }
+
+   string tmp = "mt4realized.csv.tmp";
+   int h = FileOpen(tmp, FILE_WRITE | FILE_TXT | FILE_COMMON | FILE_ANSI);
+   if(h == INVALID_HANDLE)
+   {
+      Print("MT4Recorder: realized export FileOpen failed ", GetLastError());
+      return;
+   }
+   double netSum = 0;
+   long fp = 0;
+   FileWriteString(h, "v1\n");
+   FileWriteString(h, "account," + IntegerToString(AccountNumber()) + "\n");
+   FileWriteString(h, "from," + from + "\n");
+   FileWriteString(h, "to," + to + "\n");
+   FileWriteString(h, "loaded," + IntegerToString(seen) + "\n");
+   FileWriteString(h, "covered," + (covered ? "1" : "0") + "\n");
+   if(covered)
+   {
+      for(int k = 0; k < total; k++)
+      {
+         if(!OrderSelect(k, SELECT_BY_POS, MODE_HISTORY)) continue;
+         datetime ts = HistStamp();
+         if(ts <= 0) continue;
+         string kind = DealKind(OrderType());
+         double profit = OrderProfit();
+         double swap = OrderSwap();
+         double comm = OrderCommission();
+         if(kind == "B" || kind == "S")
+         {
+            double net = profit + swap + comm;
+            netSum += net;
+            fp = fp * 131 + (long)MathRound(net * 100.0) + (long)(DayStart(ts) / 86400);
+         }
+         FileWriteString(h, kind + "," + TimeToString(ts, TIME_DATE) + ","
+            + DoubleToString(profit, 2) + "," + DoubleToString(swap, 2) + ","
+            + DoubleToString(comm, 2) + "," + CleanSym(OrderSymbol()) + "\n");
+      }
+   }
+   FileClose(h);
+   if(!FileMove(tmp, FILE_COMMON, "mt4realized.csv", FILE_COMMON | FILE_REWRITE))
+   {
+      Print("MT4Recorder: realized export FileMove failed ", GetLastError());
+      return;
+   }
+   g_histFrom = from;
+   g_histTo = to;
+   g_histLoaded = seen;
+   g_histCovered = covered;
+   g_histStamp = IntegerToString(seen) + "|" + from + "|" + to + "|" + (covered ? "1" : "0") + "|" + DoubleToString(netSum, 2) + "|" + IntegerToString(fp);
+}
+
+string RealizedExportJson()
+{
+   return "\"realizedExport\":{\"file\":\"mt4realized.csv\",\"account\":" + IntegerToString(AccountNumber())
+      + ",\"from\":" + Q(g_histFrom) + ",\"to\":" + Q(g_histTo)
+      + ",\"loaded\":" + IntegerToString(g_histLoaded)
+      + ",\"covered\":" + (g_histCovered ? "true" : "false")
+      + ",\"stamp\":" + Q(g_histStamp) + "}";
+}
+
 int OnInit()
 {
    g_gold = FindGold();
@@ -189,6 +338,7 @@ void OnTimer() { WriteJson(); }
 void WriteJson()
 {
    RefreshRates();
+   UpdateRealizedExport();
    datetime now = TimeCurrent();
    datetime dayStart = now - (now % 86400);
 
@@ -276,6 +426,7 @@ void WriteJson()
    }
    j += MarketsJson() + ",";
    j += ClosedWeekJson(now) + ",";
+   j += RealizedExportJson() + ",";
    j += "\"serverTime\":" + T(now) + ",";
    j += "\"localTime\":" + T(TimeLocal()) + ",";
    j += "\"unix\":" + IntegerToString((long)TimeGMT());
