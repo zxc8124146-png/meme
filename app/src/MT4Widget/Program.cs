@@ -7,6 +7,7 @@ internal static class Program
 	[STAThread]
 	private static void Main(string[] args)
 	{
+		Widget.Startup("main");
 		Application.SetHighDpiMode((HighDpiMode)3);
 		Application.EnableVisualStyles();
 		Application.SetCompatibleTextRenderingDefault(false);
@@ -18,13 +19,23 @@ internal static class Program
 		{
 			Widget.Log(e.ExceptionObject as Exception);
 		};
-		if (args.Length >= 2 && args[0] == "--render")
+		try
 		{
-			Widget.RenderPreview(args[1]);
+			if (args.Length >= 2 && args[0] == "--render")
+			{
+				Widget.RenderPreview(args[1]);
+			}
+			else
+			{
+				Widget.Startup("run");
+				Application.Run((Form)(object)new Widget());
+				Widget.Startup("exit");
+			}
 		}
-		else
+		catch (Exception ex)
 		{
-			Application.Run((Form)(object)new Widget());
+			Widget.Log(ex);
+			throw;
 		}
 	}
 }

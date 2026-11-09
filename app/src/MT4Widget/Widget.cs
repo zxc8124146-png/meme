@@ -117,14 +117,29 @@ internal class Widget : Form
 
 	private float K => (float)this.DeviceDpi / 96f;
 
+	private int createParamsDepth;
+
 	protected override CreateParams CreateParams
 	{
 		get
 		{
-			CreateParams createParams = this.CreateParams;
-			createParams.ClassStyle |= 0x20000;
-			createParams.Style |= 0x20000;
-			return createParams;
+			if (++createParamsDepth > 1)
+			{
+				createParamsDepth--;
+				Startup("create-params-reentry");
+				throw new InvalidOperationException("CreateParams called itself");
+			}
+			try
+			{
+				CreateParams createParams = base.CreateParams;
+				createParams.ClassStyle |= 0x20000;
+				createParams.Style |= 0x20000;
+				return createParams;
+			}
+			finally
+			{
+				createParamsDepth--;
+			}
 		}
 	}
 
@@ -135,7 +150,19 @@ internal class Widget : Form
 		try
 		{
 			Directory.CreateDirectory(AppDir);
-			File.AppendAllText(Path.Combine(AppDir, "error.log"), DateTime.Now.ToString() + " " + e?.ToString() + "\n");
+			File.AppendAllText(Path.Combine(AppDir, "error.log"), DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture) + " " + e?.ToString() + "\n");
+		}
+		catch
+		{
+		}
+	}
+
+	public static void Startup(string step)
+	{
+		try
+		{
+			Directory.CreateDirectory(AppDir);
+			File.AppendAllText(Path.Combine(AppDir, "error.log"), DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture) + " startup " + step + "\n");
 		}
 		catch
 		{
@@ -162,6 +189,10 @@ internal class Widget : Form
 		//IL_0145: Unknown result type (might be due to invalid IL or missing references)
 		//IL_014f: Expected O, but got Unknown
 		preview = previewMode;
+		if (!preview)
+		{
+			Startup("ctor");
+		}
 		try
 		{
 			Directory.CreateDirectory(AppDir);
@@ -261,13 +292,34 @@ internal class Widget : Form
 			frame.Start();
 			data.Start();
 		}
+		if (!preview)
+		{
+			Startup("ctor-ready");
+		}
 	}
+
+	private int onLoadDepth;
 
 	protected override void OnLoad(EventArgs e)
 	{
-		this.OnLoad(e);
-		ApplyModeSize(initial: true);
-		ReadData();
+		Startup("onload");
+		if (++onLoadDepth > 1)
+		{
+			onLoadDepth--;
+			Startup("onload-reentry");
+			throw new InvalidOperationException("OnLoad called itself");
+		}
+		try
+		{
+			base.OnLoad(e);
+			ApplyModeSize(initial: true);
+			ReadData();
+			Startup("onload-ready");
+		}
+		finally
+		{
+			onLoadDepth--;
+		}
 	}
 
 	private void LoadCfg()
@@ -389,7 +441,7 @@ internal class Widget : Form
 		//IL_0028: Invalid comparison between Unknown and I4
 		//IL_002b: Unknown result type (might be due to invalid IL or missing references)
 		//IL_0031: Invalid comparison between Unknown and I4
-		this.OnKeyDown(e);
+		base.OnKeyDown(e);
 		if ((int)e.KeyCode == 122)
 		{
 			ToggleMax(full: true);
@@ -420,25 +472,25 @@ internal class Widget : Form
 
 	protected override void OnResize(EventArgs e)
 	{
-		this.OnResize(e);
+		base.OnResize(e);
 		UpdateRegion();
 		this.Invalidate();
 	}
 
 	protected override void OnResizeEnd(EventArgs e)
 	{
-		this.OnResizeEnd(e);
+		base.OnResizeEnd(e);
 		SaveCfg();
 	}
 
 	protected override void OnMove(EventArgs e)
 	{
-		this.OnMove(e);
+		base.OnMove(e);
 	}
 
 	protected override void OnDpiChanged(DpiChangedEventArgs e)
 	{
-		this.OnDpiChanged(e);
+		base.OnDpiChanged(e);
 		UpdateRegion();
 		this.Invalidate();
 	}
@@ -446,7 +498,7 @@ internal class Widget : Form
 	protected override void OnFormClosing(FormClosingEventArgs e)
 	{
 		SaveCfg();
-		this.OnFormClosing(e);
+		base.OnFormClosing(e);
 	}
 
 	private void UpdateRegion()
@@ -482,13 +534,23 @@ internal class Widget : Form
 		}
 	}
 
+	private int wndProcDepth;
+
 	protected override void WndProc(ref Message m)
 	{
 		//IL_0070: Unknown result type (might be due to invalid IL or missing references)
 		//IL_0076: Invalid comparison between Unknown and I4
+		if (++wndProcDepth > 32)
+		{
+			wndProcDepth--;
+			Startup("wndproc-reentry msg=" + m.Msg.ToString(CultureInfo.InvariantCulture));
+			throw new InvalidOperationException("WndProc reentered");
+		}
+		try
+		{
 		if (m.Msg == 132)
 		{
-			this.WndProc(ref m);
+			base.WndProc(ref m);
 			long num = ((IntPtr)(nint)m.LParam).ToInt64();
 			Point point = this.PointToClient(new Point((short)(num & 0xFFFF), (short)((num >> 16) & 0xFFFF)));
 			float k = K;
@@ -567,18 +629,23 @@ internal class Widget : Form
 		}
 		else if (m.Msg == 562)
 		{
-			this.WndProc(ref m);
+			base.WndProc(ref m);
 			SaveCfg();
 		}
 		else
 		{
-			this.WndProc(ref m);
+			base.WndProc(ref m);
+		}
+		}
+		finally
+		{
+			wndProcDepth--;
 		}
 	}
 
 	protected override void OnMouseMove(MouseEventArgs e)
 	{
-		this.OnMouseMove(e);
+		base.OnMouseMove(e);
 		hover = e.Location;
 		if (draggingSlider)
 		{
@@ -589,7 +656,7 @@ internal class Widget : Form
 
 	protected override void OnMouseLeave(EventArgs e)
 	{
-		this.OnMouseLeave(e);
+		base.OnMouseLeave(e);
 		hover = new Point(-1, -1);
 	}
 
@@ -597,7 +664,7 @@ internal class Widget : Form
 	{
 		//IL_0008: Unknown result type (might be due to invalid IL or missing references)
 		//IL_0012: Invalid comparison between Unknown and I4
-		this.OnMouseDown(e);
+		base.OnMouseDown(e);
 		if ((int)e.Button == 1048576)
 		{
 			PointF pt = new PointF((float)e.X / K, (float)e.Y / K);
@@ -614,7 +681,7 @@ internal class Widget : Form
 	{
 		//IL_0025: Unknown result type (might be due to invalid IL or missing references)
 		//IL_002f: Invalid comparison between Unknown and I4
-		this.OnMouseUp(e);
+		base.OnMouseUp(e);
 		if (draggingSlider)
 		{
 			draggingSlider = false;

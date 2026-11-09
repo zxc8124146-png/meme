@@ -2,7 +2,7 @@
 
 This folder is the Windows widget. Trading stays read-only: `MT4Recorder.mq4` only reads the account and writes files. It does not place, change, or delete orders.
 
-The widget was cross-compiled on Linux with the .NET 8 SDK (`win-x64`, self-contained, single file). It was not started on Windows and was not attached to a live MT4 terminal in this change.
+The widget was cross-compiled on Linux with the .NET 8 SDK (`win-x64`, self-contained, single file). Version 1.1.1 fixes a startup stack overflow in 1.1.0 (`this.CreateParams` / `this.OnLoad` / `this.WndProc` called themselves). That crash is `0xc00000fd` and does not reach `error.log` unless the new startup lines are written first. This environment has no Windows session and no MetaEditor, so those two tools were not run here. `error.log` now records `startup main`, `startup ctor`, `startup ctor-ready`, `startup run`, `startup onload`, and `startup onload-ready`. A reentered `CreateParams`, `OnLoad`, or `WndProc` throws `InvalidOperationException` and is appended to that log instead of overflowing the stack.
 
 ## What the update does
 

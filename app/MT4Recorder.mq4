@@ -3,7 +3,7 @@
 //| 每 2 秒輸出 JSON 到 Common\Files\mt4dash.json                    |
 //+------------------------------------------------------------------+
 #property copyright "kin"
-#property version   "1.10"
+#property version   "1.11"
 #property strict
 
 // Read-only. This EA never places, modifies, or deletes orders.
@@ -197,8 +197,12 @@ string DealKind(int t)
 {
    if(t == OP_BUY) return "B";
    if(t == OP_SELL) return "S";
-   if(t == OP_BALANCE) return "D";
-   if(t == OP_CREDIT) return "C";
+   // Deposit/withdrawal is history type 6 and credit is 7. Those names are
+   // not in the documented order-type enum and are undeclared on some
+   // MetaEditor builds, so the numeric codes are used directly.
+   // Market orders stay 0 and 1; anything above OP_SELL is still not earnings.
+   if(t == 6) return "D";
+   if(t == 7) return "C";
    if(t == OP_BUYLIMIT || t == OP_SELLLIMIT || t == OP_BUYSTOP || t == OP_SELLSTOP) return "P";
    return "O";
 }

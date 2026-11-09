@@ -117,7 +117,7 @@ internal class HistoryForm : Form
 
 	protected override void OnMouseUp(MouseEventArgs e)
 	{
-		this.OnMouseUp(e);
+		base.OnMouseUp(e);
 		PointF pt = new PointF((float)e.X / K, (float)e.Y / K);
 		for (int i = 0; i < 3; i++)
 		{
@@ -132,7 +132,7 @@ internal class HistoryForm : Form
 
 	protected override void OnMouseMove(MouseEventArgs e)
 	{
-		this.OnMouseMove(e);
+		base.OnMouseMove(e);
 		PointF p = new PointF((float)e.X / K, (float)e.Y / K);
 		this.Cursor = (tabs.Any((RectangleF t) => t.Contains(p)) ? Cursors.Hand : Cursors.Default);
 	}

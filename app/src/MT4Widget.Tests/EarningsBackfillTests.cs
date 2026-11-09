@@ -217,13 +217,68 @@ public class EarningsBackfillTests
 	}
 
 	[Fact]
+	public void LegacyOnly_NoExport_LeavesHistoryUntouched()
+	{
+		string root = TempRoot();
+		try
+		{
+			string legacy = "date,closingEquity,balance,realizedPL\n2026.11.01,100.00,90.00,1.25\n2026.11.02,101.00,90.00,0.00\n2026.11.03,102.50,90.00,-2.00\n";
+			File.WriteAllText(Path.Combine(root, "history.csv"), legacy);
+			Assert.Equal(4, File.ReadAllLines(Path.Combine(root, "history.csv")).Length);
+			EarningsStore store = new EarningsStore(root);
+			BackfillResult missing = store.ApplyExportFile("90000001", Path.Combine(root, "mt4realized.csv"));
+			Assert.False(missing.ExportSeen);
+			Assert.False(missing.Wrote);
+			Assert.Contains("不會記成 0", missing.Note);
+			Assert.False(File.Exists(store.AccountPath("90000001")));
+			Assert.False(File.Exists(Path.Combine(root, EarningsStore.LegacyBackupName)));
+			Assert.Equal(legacy, File.ReadAllText(Path.Combine(root, "history.csv")));
+			Assert.Empty(Directory.GetFiles(root, "history_*.csv"));
+		}
+		finally
+		{
+			Directory.Delete(root, recursive: true);
+		}
+	}
+
+	[Fact]
+	public void FreshAndOffline_DoNotInventDays()
+	{
+		string fresh = TempRoot();
+		string offline = TempRoot();
+		try
+		{
+			EarningsStore freshStore = new EarningsStore(fresh);
+			BackfillResult none = freshStore.ApplyExportFile("90000001", Path.Combine(fresh, "mt4realized.csv"));
+			Assert.False(none.Wrote);
+			Assert.Empty(Directory.GetFiles(fresh));
+			File.WriteAllText(Path.Combine(offline, "mt4realized.csv"), "v1\naccount,90000001\nfrom,\nto,\nloaded,0\ncovered,0\n");
+			EarningsStore offlineStore = new EarningsStore(offline);
+			BackfillResult unread = offlineStore.ApplyExportFile("90000001", Path.Combine(offline, "mt4realized.csv"));
+			Assert.True(unread.ExportSeen);
+			Assert.False(unread.Covered);
+			Assert.False(unread.Wrote);
+			Assert.Contains("不是 0", unread.Note);
+			Assert.False(File.Exists(offlineStore.AccountPath("90000001")));
+		}
+		finally
+		{
+			Directory.Delete(fresh, recursive: true);
+			Directory.Delete(offline, recursive: true);
+		}
+	}
+
+	[Fact]
 	public void Recorder_StaysReadOnly_AndExplainsHistoryLimit()
 	{
 		string source = File.ReadAllText(RepoFile("app/MT4Recorder.mq4"));
 		Assert.DoesNotContain(Regex.Matches(source, @"\bOrder(Send|Modify|Delete|Close|CloseBy)\b").Cast<Match>(), m => true);
 		Assert.Contains("全部歷史", source);
 		Assert.Contains("OrderProfit() + OrderSwap() + OrderCommission()", source);
-		Assert.Contains("OP_BALANCE", source);
+		Assert.DoesNotContain("OP_BALANCE", source);
+		Assert.DoesNotContain("OP_CREDIT", source);
+		Assert.Contains("if(t == 6) return \"D\";", source);
+		Assert.Contains("if(t == 7) return \"C\";", source);
 		Assert.Contains("mt4realized.csv", source);
 		Assert.DoesNotContain("password", source, StringComparison.OrdinalIgnoreCase);
 	}
